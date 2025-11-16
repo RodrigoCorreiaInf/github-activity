@@ -9,10 +9,24 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Arrays;
 
+/**
+ * A simple CLI application that fetches and displays a GitHub user's
+ * public activity events using the GitHub REST API.
+ *
+ * <p>This application takes a GitHub username as a command-line argument and
+ * retrieves their recent events, printing them in a human-readable format.</p>
+ */
 public class Main {
 
+    /**
+     * Entry point of the application.
+     *
+     * @param args command-line arguments. Expected: {@code <username>}
+     *
+     * @throws IOException          if an I/O error occurs while making the HTTP request.
+     * @throws InterruptedException if the HTTP request is interrupted.
+     */
     public static void main(String[] args) throws IOException, InterruptedException {
         if (args.length == 0) {
             System.out.println("Usage: java Main get <username>");
@@ -25,6 +39,17 @@ public class Main {
         main.fetchGithubActivity(username);
     }
 
+    /**
+     * Fetches recent GitHub activity events for the specified user and displays them.
+     *
+     * <p>Makes a GET request to {@code https://api.github.com/users/<username>/events}
+     * and parses the returned JSON response.</p>
+     *
+     * @param username the GitHub username to retrieve activity for.
+     *
+     * @throws IOException          if an error occurs during HTTP communication or JSON parsing.
+     * @throws InterruptedException if the HTTP request is interrupted.
+     */
     private void fetchGithubActivity(String username) throws IOException, InterruptedException {
         String GITHUB_URI = String.format("https://api.github.com/users/%s/events", username);
         ObjectMapper mapper = new ObjectMapper();
@@ -50,6 +75,14 @@ public class Main {
 
     }
 
+    /**
+     * Displays a list of GitHub activity events in a user-friendly format.
+     *
+     * <p>Each event type (push, pull request, star, fork, etc.) is handled separately
+     * to produce readable descriptions.</p>
+     *
+     * @param events the array of GitHub event objects returned by the API.
+     */
     private void display(ArrayNode events) {
         for (JsonNode event : events) {
             String type = event.get("type").asText();
@@ -92,6 +125,13 @@ public class Main {
 
     }
 
+    /**
+     * Capitalizes the first letter of a string.
+     *
+     * @param text the input string.
+     * @return the string with its first character capitalized,
+     * or the original string if empty or null.
+     */
     private static String capitalize(String text) {
         if (text == null || text.isEmpty()) return text;
         return text.substring(0, 1).toUpperCase() + text.substring(1);
