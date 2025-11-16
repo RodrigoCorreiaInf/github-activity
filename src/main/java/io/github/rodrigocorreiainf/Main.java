@@ -1,40 +1,70 @@
 package io.github.rodrigocorreiainf;
 
-import java.io.File;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
-
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        String username = "rodrigocorreiainf";
+        String username = "kamranahmedse";
 
+        Main main = new Main();
+
+        main.fetchGithubActivity(username);
+
+
+    }
+
+    private void fetchGithubActivity(String username) throws IOException, InterruptedException {
+        String GITHUB_URI = "https://api.github.com/users/" + username + "/events";
+        ObjectMapper mapper = new ObjectMapper();
 
         HttpClient httpClient = HttpClient.newHttpClient();
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.github.com/users/" + username + "/events"))
-                .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(GITHUB_URI)).build();
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-        JsonNode json = mapper.readTree(response.body());
+        if (httpResponse.statusCode() == 404) {
+            System.out.println("Username not found.");
+        }
 
-        mapper.writerWithDefaultPrettyPrinter().writeValue(new File("file.json"), json);
+        if (httpResponse.statusCode() == 200) {
+            JsonNode node = mapper.readTree(httpResponse.body());
+
+            if (node.isArray()) {
+                ArrayNode events = (ArrayNode) node;
+                display(events);
+            }
+
+
+        }
+    }
+
+    private void display(ArrayNode events) {
+
+        for (JsonNode event : events) {
+            String type = event.get("type").toString();
+            String action;
+            switch (type) {
+                case "\"PushEvent\"" -> System.out.println(event);
+                case "CreateEvent" -> System.out.println("create");
+            }
+
+
+        }
+
     }
 
 }
