@@ -3,6 +3,8 @@
 A simple command-line application that fetches and displays a GitHub
 user's recent public activity events using the GitHub REST API.
 
+https://roadmap.sh/projects/github-user-activity
+
 This tool allows you to quickly check events such as pushes, pull
 requests, stars, forks, releases, and more --- directly from your
 terminal.
